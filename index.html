@@ -355,11 +355,31 @@
     <div class="chart-card">
       <div class="chart-header">
         <div>
-          <div class="chart-title">Chỉ số 2 — Dòng Tiền Cuối Kỳ Thực Tế Theo Đơn Vị</div>
+          <div class="chart-title">Chỉ số 2 — Dòng Tiền Đầu Kỳ Thực Tế Theo Đơn Vị</div>
+          <div class="chart-sub">Dương: Holding nợ đơn vị | Âm: Đơn vị nợ Holding (triệu đồng)</div>
+        </div>
+      </div>
+      <div class="chart-container" style="height:280px"><canvas id="chartDauKyTT"></canvas></div>
+    </div>
+  </div>
+  <div class="chart-grid-2">
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Chỉ số 3 — Dòng Tiền Cuối Kỳ Thực Tế Theo Đơn Vị</div>
           <div class="chart-sub">Dương: Holding nợ đơn vị | Âm: Đơn vị nợ Holding (triệu đồng)</div>
         </div>
       </div>
       <div class="chart-container" style="height:280px"><canvas id="chartDVTV"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Chỉ số 4 — Dòng Tiền Cuối Kỳ Theo Sổ Sách Theo Đơn Vị</div>
+          <div class="chart-sub">Dương: Holding nợ đơn vị | Âm: Đơn vị nợ Holding (triệu đồng)</div>
+        </div>
+      </div>
+      <div class="chart-container" style="height:280px"><canvas id="chartCuoiKySS"></canvas></div>
     </div>
   </div>
 
@@ -369,7 +389,7 @@
     <div class="chart-card">
       <div class="chart-header">
         <div>
-          <div class="chart-title">Chỉ số 3 — Thu Thực Tế / Được Chi / Chi Thực Tế</div>
+          <div class="chart-title">Chỉ số 5 — Thu Thực Tế / Được Chi / Chi Thực Tế</div>
           <div class="chart-sub">Theo từng đơn vị thành viên (triệu đồng)</div>
         </div>
       </div>
@@ -378,7 +398,7 @@
     <div class="chart-card">
       <div class="chart-header">
         <div>
-          <div class="chart-title">Chỉ số 4 — Cơ Cấu Chi Phí Holding Theo Khoản Mục</div>
+          <div class="chart-title">Chỉ số 6 — Cơ Cấu Chi Phí Holding Theo Khoản Mục</div>
           <div class="chart-sub">Tỷ trọng từng khoản mục chi phí trong kỳ</div>
         </div>
       </div>
@@ -392,7 +412,7 @@
     <div class="chart-card">
       <div class="chart-header">
         <div>
-          <div class="chart-title">Chỉ số 5 — Thu Cố Định: Phải Thu / Đã Thu / Còn Lại</div>
+          <div class="chart-title">Chỉ số 7 — Thu Cố Định: Phải Thu / Đã Thu / Còn Lại</div>
           <div class="chart-sub">Theo từng đơn vị thành viên (triệu đồng)</div>
         </div>
       </div>
@@ -401,7 +421,7 @@
     <div class="chart-card">
       <div class="chart-header">
         <div>
-          <div class="chart-title">Chỉ số 6 — Công Nợ Phòng Mua Theo Đơn Vị</div>
+          <div class="chart-title">Chỉ số 8 — Công Nợ Phòng Mua Theo Đơn Vị</div>
           <div class="chart-sub">Đến hạn / Đã thu / Còn phải thu (triệu đồng)</div>
         </div>
       </div>
@@ -708,19 +728,25 @@ function renderDashboard(wb) {
   // Biểu đồ 1: Thu Chi Holding
   renderChartHolding(holding);
 
-  // ── Chart 2: ĐVTV Cash Position ──
+  // Biểu đồ 2: Dòng tiền đầu kỳ thực tế theo đơn vị
+  renderChartDauKyTT(tongHop);
+
+  // Biểu đồ 3: Dòng tiền cuối kỳ thực tế theo đơn vị
   renderChartDVTV(tongHop);
 
-  // ── Chart 3: Company Compare ──
+  // Biểu đồ 4: Dòng tiền cuối kỳ sổ sách theo đơn vị
+  renderChartCuoiKySS(tongHop);
+
+  // Biểu đồ 5: So sánh đơn vị
   renderChartCompare(tongHop);
 
-  // Biểu đồ 4: Cơ cấu chi phí
+  // Biểu đồ 6: Cơ cấu chi phí
   renderChartExpense(holding);
 
-  // Biểu đồ 5: Thu cố định
+  // Biểu đồ 7: Thu cố định
   renderChartAR(tongHop);
 
-  // Biểu đồ 6: Công nợ phòng mua
+  // Biểu đồ 8: Công nợ phòng mua
   if(phongMua) renderChartPM(phongMua);
 
   // Cảnh báo
@@ -765,9 +791,49 @@ function renderChartHolding(h) {
   });
 }
 
-// Biểu đồ 2: Dòng tiền ĐVTV
+// Biểu đồ 2: Dòng tiền đầu kỳ thực tế theo đơn vị
+function renderChartDauKyTT(th) {
+  const filtered = th.rows.filter(r => r.name !== "PHÒNG MUA");
+  const labels = filtered.map(r => r.name);
+  const data   = filtered.map(r => (r.dauKyTT || 0) / 1e6);
+  const colors = data.map(v => v >= 0 ? "rgba(41,128,185,.75)" : "rgba(231,76,60,.75)");
+  const borders= data.map(v => v >= 0 ? "#2980b9" : "#e74c3c");
+
+  destroyChart("chartDauKyTT");
+  charts.chartDauKyTT = new Chart(document.getElementById("chartDauKyTT"), {
+    type: "bar",
+    data: {
+      labels,
+      datasets: [{
+        label: "Dòng tiền đầu kỳ thực tế",
+        data, backgroundColor: colors, borderColor: borders, borderWidth: 1
+      }]
+    },
+    options: {
+      indexAxis: "y",
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        datalabels: {
+          anchor: d => d.dataset.data[d.dataIndex] >= 0 ? "end" : "start",
+          align:  d => d.dataset.data[d.dataIndex] >= 0 ? "right" : "left",
+          font: {size:9, weight:"bold"},
+          color: d => d.dataset.data[d.dataIndex] >= 0 ? "#2980b9" : "#e74c3c",
+          formatter: v => fmt(v*1e6)
+        }
+      },
+      scales: {
+        x: { ticks:{font:{size:9}, callback:v => fmt(v*1e6)}, grid:{color:"#f0f2f5"} },
+        y: { ticks:{font:{size:10}} }
+      }
+    },
+    plugins: [ChartDataLabels]
+  });
+}
+
+// Biểu đồ 3: Dòng tiền cuối kỳ thực tế theo đơn vị
 function renderChartDVTV(th) {
-  // Use cuoiKyTT (actual end period)
+  // Sử dụng cuoiKyTT (dòng tiền cuối kỳ thực tế)
   const filtered = th.rows.filter(r => r.name !== "PHÒNG MUA");
   const labels = filtered.map(r => r.name);
   const data   = filtered.map(r => r.cuoiKyTT / 1e6);
@@ -806,7 +872,47 @@ function renderChartDVTV(th) {
   });
 }
 
-// Biểu đồ 3: So sánh đơn vị
+// Biểu đồ 4: Dòng tiền cuối kỳ sổ sách theo đơn vị
+function renderChartCuoiKySS(th) {
+  const filtered = th.rows.filter(r => r.name !== "PHÒNG MUA");
+  const labels = filtered.map(r => r.name);
+  const data   = filtered.map(r => (r.cuoiKySS || 0) / 1e6);
+  const colors = data.map(v => v >= 0 ? "rgba(142,68,173,.75)" : "rgba(231,76,60,.75)");
+  const borders= data.map(v => v >= 0 ? "#8e44ad" : "#e74c3c");
+
+  destroyChart("chartCuoiKySS");
+  charts.chartCuoiKySS = new Chart(document.getElementById("chartCuoiKySS"), {
+    type: "bar",
+    data: {
+      labels,
+      datasets: [{
+        label: "Dòng tiền cuối kỳ sổ sách",
+        data, backgroundColor: colors, borderColor: borders, borderWidth: 1
+      }]
+    },
+    options: {
+      indexAxis: "y",
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        datalabels: {
+          anchor: d => d.dataset.data[d.dataIndex] >= 0 ? "end" : "start",
+          align:  d => d.dataset.data[d.dataIndex] >= 0 ? "right" : "left",
+          font: {size:9, weight:"bold"},
+          color: d => d.dataset.data[d.dataIndex] >= 0 ? "#8e44ad" : "#e74c3c",
+          formatter: v => fmt(v*1e6)
+        }
+      },
+      scales: {
+        x: { ticks:{font:{size:9}, callback:v => fmt(v*1e6)}, grid:{color:"#f0f2f5"} },
+        y: { ticks:{font:{size:10}} }
+      }
+    },
+    plugins: [ChartDataLabels]
+  });
+}
+
+// Biểu đồ 5: So sánh đơn vị
 function renderChartCompare(th) {
   const filtered = th.rows.filter(r => r.name !== "PHÒNG MUA");
   const labels = filtered.map(r => r.name.replace("CHI NHÁNH ", "CN ").replace("NHÀ MÁY HEXA","Nhà Máy"));
@@ -1221,7 +1327,9 @@ function renderDashboard_demo(holding, tongHop, phongMua) {
   document.getElementById("kpi-congno-rate").textContent = rate.toFixed(1)+"%";
 
   renderChartHolding(holding);
+  renderChartDauKyTT(tongHop);
   renderChartDVTV(tongHop);
+  renderChartCuoiKySS(tongHop);
   renderChartCompare(tongHop);
   renderChartExpense(holding);
   renderChartAR(tongHop);
