@@ -306,7 +306,7 @@
 <div class="main">
 
   <!-- Tổng quan -->
-  <div class="section-title">Tổng Quan — Tình Hình Dòng Tiền Toàn Tập Đoàn</div>
+  <div class="section-title">Tổng Quan — Dòng Tiền Tập Đoàn</div>
   <div class="kpi-grid">
     <div class="kpi-card gold">
       <div class="kpi-label">Tồn Quỹ Holding Cuối Kỳ</div>
@@ -339,9 +339,6 @@
       <div class="kpi-sub">Tỷ lệ thu: <b id="kpi-congno-rate">36.6%</b> <span class="kpi-badge badge-danger">Thấp</span></div>
     </div>
   </div>
-
-  <!-- Thu chi Holding -->
-  <div class="section-title">Thu / Chi / Dòng Tiền Holding</div>
   <div class="chart-grid-2">
     <div class="chart-card">
       <div class="chart-header">
@@ -350,7 +347,30 @@
           <div class="chart-sub">Từng khoản thu/chi trong kỳ (triệu đồng)</div>
         </div>
       </div>
-      <div class="chart-container" style="height:280px"><canvas id="chartHolding"></canvas></div>
+      <div class="chart-container" style="height:300px"><canvas id="chartHolding"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Chỉ số 6 — Cơ Cấu Chi Phí Holding Theo Khoản Mục</div>
+          <div class="chart-sub">Tỷ trọng từng khoản mục chi phí trong kỳ</div>
+        </div>
+      </div>
+      <div class="chart-container" style="height:300px"><canvas id="chartExpense"></canvas></div>
+    </div>
+  </div>
+
+  <!-- Dòng tiền ĐVTV -->
+  <div class="section-title">Dòng Tiền ĐVTV</div>
+  <div class="chart-grid-2">
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Chỉ số 5 — Thu Thực Tế / Được Chi / Chi Thực Tế</div>
+          <div class="chart-sub">Theo từng đơn vị thành viên (triệu đồng)</div>
+        </div>
+      </div>
+      <div class="chart-container" style="height:280px"><canvas id="chartCompare"></canvas></div>
     </div>
     <div class="chart-card">
       <div class="chart-header">
@@ -380,29 +400,6 @@
         </div>
       </div>
       <div class="chart-container" style="height:280px"><canvas id="chartCuoiKySS"></canvas></div>
-    </div>
-  </div>
-
-  <!-- So sánh đơn vị -->
-  <div class="section-title">So Sánh Đơn Vị — Thu / Được Chi / Chi Thực Tế</div>
-  <div class="chart-grid-2">
-    <div class="chart-card">
-      <div class="chart-header">
-        <div>
-          <div class="chart-title">Chỉ số 5 — Thu Thực Tế / Được Chi / Chi Thực Tế</div>
-          <div class="chart-sub">Theo từng đơn vị thành viên (triệu đồng)</div>
-        </div>
-      </div>
-      <div class="chart-container" style="height:280px"><canvas id="chartCompare"></canvas></div>
-    </div>
-    <div class="chart-card">
-      <div class="chart-header">
-        <div>
-          <div class="chart-title">Chỉ số 6 — Cơ Cấu Chi Phí Holding Theo Khoản Mục</div>
-          <div class="chart-sub">Tỷ trọng từng khoản mục chi phí trong kỳ</div>
-        </div>
-      </div>
-      <div class="chart-container" style="height:280px"><canvas id="chartExpense"></canvas></div>
     </div>
   </div>
 
@@ -763,8 +760,8 @@ function renderChartHolding(h) {
   const thData = [h.dauKy / 1e6];
   const chiData = [0];
   h.items.forEach(i => {
-    if(i.thu > 0) { labels.push(i.dg.length > 25 ? i.dg.substr(0,25)+"…" : i.dg); thData.push(i.thu/1e6); chiData.push(0); }
-    if(i.chi > 0) { labels.push(i.dg.length > 25 ? i.dg.substr(0,25)+"…" : i.dg); thData.push(0); chiData.push(i.chi/1e6); }
+    if(i.thu > 0) { labels.push(i.dg); thData.push(i.thu/1e6); chiData.push(0); }
+    if(i.chi > 0) { labels.push(i.dg); thData.push(0); chiData.push(i.chi/1e6); }
   });
   labels.push("Tồn cuối kỳ");
   thData.push(h.tonQuy/1e6);
@@ -784,7 +781,7 @@ function renderChartHolding(h) {
       responsive: true, maintainAspectRatio: false,
       plugins: { legend: { position:"top", labels:{font:{size:10}} }, datalabels:{display:false} },
       scales: {
-        x: { stacked: true, ticks:{font:{size:9}, maxRotation:40, minRotation:20} },
+        x: { stacked: true, ticks:{font:{size:9}, maxRotation:55, minRotation:30} },
         y: { stacked: false, ticks:{font:{size:10}, callback:v => fmt(v*1e6)} }
       }
     }
