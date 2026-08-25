@@ -604,11 +604,19 @@ function parseHoldingSheet(wb) {
     const cuoiky = fmtRaw(getCell(ws, r, 4));
     if(dg) items.push({stt, dg, thu, chi, cuoiky});
   }
-  // Row 18: Tồn quỹ
-  const tonQuy = fmtRaw(getCell(ws, 18, 4));
-  // Row 20: Tổng cộng
-  const totalThu = fmtRaw(getCell(ws, 20, 2));
-  const totalChi = fmtRaw(getCell(ws, 20, 3));
+  // Tính tổng thu/chi từ các dòng dữ liệu (không phụ thuộc vị trí dòng tổng cộng)
+  const totalThu = items.reduce((s, i) => s + (i.thu || 0), 0);
+  const totalChi = items.reduce((s, i) => s + (i.chi || 0), 0);
+  // Tồn quỹ: thử đọc từ Excel, nếu không có thì tính từ công thức
+  let tonQuy = fmtRaw(getCell(ws, 18, 4));
+  if(!tonQuy) {
+    // Thử quét các dòng sau dữ liệu để tìm dòng tồn quỹ
+    for(let r = 17; r <= 25; r++) {
+      const v = fmtRaw(getCell(ws, r, 4));
+      if(v && Math.abs(v - (dauKy + totalThu - totalChi)) < 1000) { tonQuy = v; break; }
+    }
+    if(!tonQuy) tonQuy = dauKy + totalThu - totalChi;
+  }
   return { periodText, dauKy, items, tonQuy, totalThu, totalChi };
 }
 
