@@ -48,22 +48,6 @@
     font-weight: 600;
   }
   .period-badge span { color: var(--gold); }
-  .upload-btn {
-    background: var(--gold);
-    color: #fff;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 6px;
-    font-size: 12px;
-    font-weight: 600;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    transition: opacity .2s;
-  }
-  .upload-btn:hover { opacity: .85; }
-  #fileInput { display: none; }
   .last-updated { color: rgba(255,255,255,.6); font-size: 11px; }
 
   /* ── MAIN ── */
@@ -294,10 +278,6 @@
   </div>
   <div class="header-right">
     <div class="period-badge">Kỳ báo cáo: <span id="reportPeriod">01/8/2026 – 15/8/2026</span></div>
-    <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
-      ⬆ Tải file Excel
-    </button>
-    <input type="file" id="fileInput" accept=".xls,.xlsx" onchange="handleFileUpload(event)">
     <div class="last-updated">Cập nhật lần cuối: <span id="lastUpdated">—</span></div>
   </div>
 </div>
@@ -552,10 +532,8 @@ const fmtRaw = v => {
   return parseFloat(v) || 0;
 };
 const pct = (a, b) => b ? (a/b*100).toFixed(1)+"%" : "—";
-const now = () => {
-  const d = new Date();
-  return d.toLocaleDateString("vi-VN") + " " + d.toLocaleTimeString("vi-VN",{hour:"2-digit",minute:"2-digit"});
-};
+// Ngày cập nhật file — tự động ghi khi push lên GitHub
+const BUILD_DATE = "25/8/2026 03:25";
 
 // Bảng màu biểu đồ
 const COLORS = {
@@ -706,7 +684,7 @@ function renderDashboard(wb) {
   if(periodMatch && periodMatch.length >= 2) {
     document.getElementById("reportPeriod").textContent = periodMatch[0] + " – " + periodMatch[1];
   }
-  document.getElementById("lastUpdated").textContent = now();
+  document.getElementById("lastUpdated").textContent = BUILD_DATE;
   document.getElementById("tablePeriod").textContent = holding.periodText;
 
   // Thẻ chỉ số
@@ -1316,7 +1294,7 @@ function renderEmbeddedDemo() {
 
 function renderDashboard_demo(holding, tongHop, phongMua) {
   document.getElementById("reportPeriod").textContent = "01/8/2026 – 15/8/2026";
-  document.getElementById("lastUpdated").textContent = "(Dữ liệu mẫu – " + now() + ")";
+  document.getElementById("lastUpdated").textContent = "(Dữ liệu mẫu – " + BUILD_DATE + ")";
   document.getElementById("tablePeriod").textContent = "(Từ ngày 01/8/2026 đến ngày 15/8/2026)";
 
   const net = holding.totalThu - holding.totalChi;
