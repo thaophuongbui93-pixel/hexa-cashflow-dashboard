@@ -568,33 +568,38 @@ function getCell(ws, r, c) {
 function parseHoldingSheet(wb) {
   const ws = wb.Sheets[CFG.sheetHolding];
   if(!ws) return null;
-  // Row 1 = period text (index 1)
   const periodText = getCell(ws, 1, 0) || "";
-  // Row 4 (index 4): col 4 = tiền đầu kỳ; col 5 = note
   const dauKy = fmtRaw(getCell(ws, 4, 4));
-  // Rows 5-17: data rows
+
+  // Quét động các dòng dữ liệu — dừng khi gặp "Tồn quỹ" hoặc dòng trống không có STT
   const items = [];
-  for(let r = 5; r <= 17; r++) {
-    const stt    = getCell(ws, r, 0);
-    const dg     = getCell(ws, r, 1);
-    const thu    = fmtRaw(getCell(ws, r, 2));
-    const chi    = fmtRaw(getCell(ws, r, 3));
-    const cuoiky = fmtRaw(getCell(ws, r, 4));
-    if(dg) items.push({stt, dg, thu, chi, cuoiky});
+  let tonQuy = null;
+  for(let r = 5; r <= 60; r++) {
+    const dg  = getCell(ws, r, 1);
+    const dgS = (dg || "").toString().trim();
+    // Dòng "Tồn quỹ" — lấy giá trị và dừng
+    if(dgS && dgS.toLowerCase().replace(/\s/g,"").includes("tồnquỹ")) {
+      tonQuy = fmtRaw(getCell(ws, r, 4));
+      break;
+    }
+    // Dòng "Tổng cộng" — dừng không lấy dữ liệu
+    if(dgS && dgS.toLowerCase().replace(/\s/g,"").includes("tổngcộng")) break;
+    // Dòng có nội dung diễn giải → đây là item
+    if(dgS) {
+      items.push({
+        stt:    getCell(ws, r, 0),
+        dg:     dgS,
+        thu:    fmtRaw(getCell(ws, r, 2)),
+        chi:    fmtRaw(getCell(ws, r, 3)),
+        cuoiky: fmtRaw(getCell(ws, r, 4))
+      });
+    }
   }
-  // Tính tổng thu/chi từ các dòng dữ liệu (không phụ thuộc vị trí dòng tổng cộng)
+
   const totalThu = items.reduce((s, i) => s + (i.thu || 0), 0);
   const totalChi = items.reduce((s, i) => s + (i.chi || 0), 0);
-  // Tồn quỹ: thử đọc từ Excel, nếu không có thì tính từ công thức
-  let tonQuy = fmtRaw(getCell(ws, 18, 4));
-  if(!tonQuy) {
-    // Thử quét các dòng sau dữ liệu để tìm dòng tồn quỹ
-    for(let r = 17; r <= 25; r++) {
-      const v = fmtRaw(getCell(ws, r, 4));
-      if(v && Math.abs(v - (dauKy + totalThu - totalChi)) < 1000) { tonQuy = v; break; }
-    }
-    if(!tonQuy) tonQuy = dauKy + totalThu - totalChi;
-  }
+  if(!tonQuy) tonQuy = dauKy + totalThu - totalChi;
+
   return { periodText, dauKy, items, tonQuy, totalThu, totalChi };
 }
 
