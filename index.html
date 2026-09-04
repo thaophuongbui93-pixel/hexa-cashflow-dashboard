@@ -1220,7 +1220,9 @@ function handleFileUpload(e) {
 
 // Tự động tải file từ ./data/cashflow.xlsx
 async function autoLoad() {
-  const candidates = ["./data/cashflow.xlsx", "./data/cashflow.xls"];
+  // Thêm ?v=BUILD_DATE để tránh browser cache dùng file Excel cũ
+  const v = encodeURIComponent(BUILD_DATE);
+  const candidates = [`./data/cashflow.xlsx?v=${v}`, `./data/cashflow.xls?v=${v}`];
   for(const url of candidates) {
     try {
       const res = await fetch(url);
